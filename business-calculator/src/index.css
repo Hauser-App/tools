@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "SF Pro";
+  src: url("https://cdn.jsdelivr.net/npm/@fontsource/sf-pro-display@4.5.0/files/sf-pro-display-400.woff2")
+    format("woff2");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "SF Pro";
+  src: url("https://cdn.jsdelivr.net/npm/@fontsource/sf-pro-display@4.5.0/files/sf-pro-display-500.woff2")
+    format("woff2");
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: "SF Pro";
+  src: url("https://cdn.jsdelivr.net/npm/@fontsource/sf-pro-display@4.5.0/files/sf-pro-display-600.woff2")
+    format("woff2");
+  font-weight: 600;
+}
+
+@font-face {
+  font-family: "SF Pro";
+  src: url("https://cdn.jsdelivr.net/npm/@fontsource/sf-pro-display@4.5.0/files/sf-pro-display-700.woff2")
+    format("woff2");
+  font-weight: 700;
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 15%;
+    --foreground: 0 0% 100%;
+
+    --card: 0 0% 15%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 0 0% 15%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 84 100% 50%;
+    --primary-foreground: 0 0% 15%;
+
+    --secondary: 0 0% 23%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 23%;
+    --muted-foreground: 0 0% 73%;
+
+    --accent: 0 0% 23%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 347 77% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 23%;
+    --input: 0 0% 23%;
+    --ring: 0 0% 100%;
+
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sf-pro;
+  }
+
+  *:focus {
+    @apply ring-1;
+  }
+}
