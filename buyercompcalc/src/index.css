@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@theme {
+  --color-hauser-navy: #1a2744;
+  --color-hauser-blue: #2a4a7f;
+  --color-hauser-light: #e8edf4;
+  --color-hauser-gold: #c5a55a;
+  --color-hauser-green: #2d8a4e;
+  --color-hauser-green-light: #e6f4ec;
+  --color-hauser-red: #c0392b;
+  --color-hauser-gray: #6b7280;
+  --color-hauser-bg: #f8f9fb;
+}
