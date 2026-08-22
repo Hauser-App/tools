@@ -31,6 +31,7 @@ interface BusinessInfo {
   ownerName: string;
   phone: string;
   email: string;
+  websiteUrl: string;
   address: string;
   yearsInBusiness: string;
 }
@@ -49,6 +50,15 @@ const parseCurrencyInput = (value: string): number | undefined => {
   const numericValue = value.replace(/[^0-9.-]+/g, "");
   if (numericValue === "") return undefined;
   return parseFloat(numericValue);
+};
+
+const formatPhoneNumber = (value: string): string => {
+  const digits = value.replace(/\D/g, "").slice(0, 10);
+  const len = digits.length;
+  if (len === 0) return "";
+  if (len < 4) return `(${digits}`;
+  if (len < 7) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
 };
 
 const StepperControls = ({
@@ -99,6 +109,7 @@ const BusinessInputForm = ({
     ownerName: "",
     phone: "",
     email: "",
+    websiteUrl: "",
     address: "",
     yearsInBusiness: "",
   });
@@ -130,7 +141,8 @@ const BusinessInputForm = ({
 
   const handleBusinessInfoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setBusinessInfo((prev) => ({ ...prev, [name]: value }));
+    const nextValue = name === "phone" ? formatPhoneNumber(value) : value;
+    setBusinessInfo((prev) => ({ ...prev, [name]: nextValue }));
   };
 
   const handleStep = (
@@ -160,288 +172,306 @@ const BusinessInputForm = ({
     "!appearance-none !border-0 bg-[#333] rounded-[8px] text-[#BBB7AF] font-semibold text-[15px] placeholder:text-[#BBB7AF] focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:shadow-[0_0_0_1.5px_rgba(192,255,2,0.35)]";
 
   return (
-    <div className="w-full lg:max-w-[350px] bg-background rounded-[25px] overflow-hidden">
-      <Card className="bg-[#262626]">
-        <div className="pt-5 px-5">
-          <h2 className="text-xs font-semibold uppercase tracking-[0.3em] text-[#BBB7AF]">
-            Acquisition Target
-          </h2>
-        </div>
-        <CardContent className="pt-5">
-          <div className="space-y-3.5">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="businessName" className="text-[13px]">
-                  Business Name
-                </Label>
-                <button
-                  type="button"
-                  onClick={() => setIsInfoExpanded((v) => !v)}
-                  className="text-[#BBB7AF] hover:text-[#f3f3f3] transition-colors"
-                  aria-label="Toggle business info"
-                >
-                  <ChevronDown
-                    className={`h-3.5 w-3.5 transition-transform ${isInfoExpanded ? "rotate-180" : ""}`}
-                  />
-                </button>
-              </div>
-              <Input
-                id="businessName"
-                name="businessName"
-                autoComplete="off"
-                value={formData.businessName}
-                onChange={handleInputChange}
-                placeholder="Enter business name"
-                className={baseInputClasses}
-              />
-            </div>
-
-            {isInfoExpanded && (
-              <div className="space-y-3.5 pt-1">
-                <div className="space-y-2">
-                  <Label htmlFor="ownerName" className="text-[13px]">
-                    Owner Name
+    <>
+      <div className="w-full lg:max-w-[350px] bg-background rounded-[25px] overflow-hidden">
+        <Card className="bg-[#262626]">
+          <div className="pt-5 px-5">
+            <h2 className="text-xs font-semibold uppercase tracking-[0.3em] text-[#BBB7AF]">
+              Acquisition Target
+            </h2>
+          </div>
+          <CardContent className="pt-5">
+            <div className="space-y-3.5">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="businessName" className="text-[13px]">
+                    Business Name/Info
                   </Label>
-                  <Input
-                    id="ownerName"
-                    name="ownerName"
-                    autoComplete="off"
-                    value={businessInfo.ownerName}
-                    onChange={handleBusinessInfoChange}
-                    placeholder="Enter owner name"
-                    className={baseInputClasses}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-[13px]">
-                    Phone
-                  </Label>
-                  <Input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    autoComplete="off"
-                    value={businessInfo.phone}
-                    onChange={handleBusinessInfoChange}
-                    placeholder="Enter phone number"
-                    className={baseInputClasses}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-[13px]">
-                    Email
-                  </Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="off"
-                    value={businessInfo.email}
-                    onChange={handleBusinessInfoChange}
-                    placeholder="Enter email address"
-                    className={baseInputClasses}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="address" className="text-[13px]">
-                    Address
-                  </Label>
-                  <Input
-                    id="address"
-                    name="address"
-                    autoComplete="off"
-                    value={businessInfo.address}
-                    onChange={handleBusinessInfoChange}
-                    placeholder="Enter business address"
-                    className={baseInputClasses}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="yearsInBusiness" className="text-[13px]">
-                    Years in Business
-                  </Label>
-                  <div className="relative group">
-                    <Input
-                      id="yearsInBusiness"
-                      name="yearsInBusiness"
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={businessInfo.yearsInBusiness}
-                      onChange={handleBusinessInfoChange}
-                      placeholder="0"
-                      className={`${baseInputClasses} pr-7`}
+                  <button
+                    type="button"
+                    onClick={() => setIsInfoExpanded((v) => !v)}
+                    className="text-[#BBB7AF] hover:text-[#f3f3f3] transition-colors"
+                    aria-label="Toggle business info"
+                  >
+                    <ChevronDown
+                      className={`h-3.5 w-3.5 transition-transform ${isInfoExpanded ? "rotate-180" : ""}`}
                     />
-                    <StepperControls
-                      onIncrement={() => handleYearsStep(1)}
-                      onDecrement={() => handleYearsStep(-1)}
+                  </button>
+                </div>
+                <Input
+                  id="businessName"
+                  name="businessName"
+                  autoComplete="off"
+                  value={formData.businessName}
+                  onChange={handleInputChange}
+                  className={baseInputClasses}
+                />
+              </div>
+
+              {isInfoExpanded && (
+                <div className="space-y-3.5 pt-1">
+                  <div className="space-y-2">
+                    <Label htmlFor="ownerName" className="text-[13px]">
+                      Owner Name
+                    </Label>
+                    <Input
+                      id="ownerName"
+                      name="ownerName"
+                      autoComplete="off"
+                      value={businessInfo.ownerName}
+                      onChange={handleBusinessInfoChange}
+                      className={baseInputClasses}
                     />
                   </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="address" className="text-[13px]">
+                      Address
+                    </Label>
+                    <Input
+                      id="address"
+                      name="address"
+                      autoComplete="off"
+                      value={businessInfo.address}
+                      onChange={handleBusinessInfoChange}
+                      className={baseInputClasses}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="phone" className="text-[13px]">
+                      Phone
+                    </Label>
+                    <Input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      autoComplete="off"
+                      value={businessInfo.phone}
+                      onChange={handleBusinessInfoChange}
+                      className={baseInputClasses}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-[13px]">
+                      Email
+                    </Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      autoComplete="off"
+                      value={businessInfo.email}
+                      onChange={handleBusinessInfoChange}
+                      className={baseInputClasses}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="websiteUrl" className="text-[13px]">
+                      Website URL
+                    </Label>
+                    <Input
+                      id="websiteUrl"
+                      name="websiteUrl"
+                      type="url"
+                      autoComplete="off"
+                      value={businessInfo.websiteUrl}
+                      onChange={handleBusinessInfoChange}
+                      className={baseInputClasses}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="yearsInBusiness" className="text-[13px]">
+                      Years in Business
+                    </Label>
+                    <div className="relative group">
+                      <Input
+                        id="yearsInBusiness"
+                        name="yearsInBusiness"
+                        type="number"
+                        min="0"
+                        step="1"
+                        value={businessInfo.yearsInBusiness}
+                        onChange={handleBusinessInfoChange}
+                        className={`${baseInputClasses} pr-7`}
+                      />
+                      <StepperControls
+                        onIncrement={() => handleYearsStep(1)}
+                        onDecrement={() => handleYearsStep(-1)}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="w-full lg:max-w-[350px] bg-background rounded-[25px] overflow-hidden">
+        <Card className="bg-[#262626]">
+          <div className="pt-5 px-5">
+            <h2 className="text-xs font-semibold uppercase tracking-[0.3em] text-[#BBB7AF]">
+              Deal Terms
+            </h2>
+          </div>
+          <CardContent className="pt-5">
+            <div className="space-y-3.5">
+              <div className="space-y-2">
+                <Label htmlFor="revenue" className="text-[13px]">
+                  Annual Revenue
+                </Label>
+                <Input
+                  id="revenue"
+                  name="revenue"
+                  value={formatCurrency(formData.revenue)}
+                  onChange={handleInputChange}
+                  className={baseInputClasses}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="cashflow" className="text-[13px]">
+                  Annual Cashflow
+                </Label>
+                <Input
+                  id="cashflow"
+                  name="cashflow"
+                  value={formatCurrency(formData.cashflow)}
+                  onChange={handleInputChange}
+                  className={baseInputClasses}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="growthRate" className="text-[13px]">
+                  Expected YoY Growth Rate (%)
+                </Label>
+                <div className="relative group">
+                  <Input
+                    id="growthRate"
+                    name="growthRate"
+                    type="number"
+                    value={formData.growthRate}
+                    onChange={handleInputChange}
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    className={`${baseInputClasses} pr-7`}
+                  />
+                  <StepperControls
+                    onIncrement={() => handleStep("growthRate", 0.1, 0, 100, 1)}
+                    onDecrement={() => handleStep("growthRate", 0.1, 0, 100, -1)}
+                  />
                 </div>
               </div>
-            )}
 
-            <div className="space-y-2">
-              <Label htmlFor="revenue" className="text-[13px]">
-                Annual Revenue
-              </Label>
-              <Input
-                id="revenue"
-                name="revenue"
-                value={formatCurrency(formData.revenue)}
-                onChange={handleInputChange}
-                placeholder="Enter annual revenue"
-                className={baseInputClasses}
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="cashflowMultiple" className="text-[13px]">
+                  Cashflow Multiple
+                </Label>
+                <div className="relative group">
+                  <Input
+                    id="cashflowMultiple"
+                    name="cashflowMultiple"
+                    type="number"
+                    value={formData.cashflowMultiple}
+                    onChange={handleInputChange}
+                    min="1.0"
+                    max="10.0"
+                    step="0.1"
+                    className={`${baseInputClasses} pr-7`}
+                  />
+                  <StepperControls
+                    onIncrement={() =>
+                      handleStep("cashflowMultiple", 0.1, 1.0, 10.0, 1)
+                    }
+                    onDecrement={() =>
+                      handleStep("cashflowMultiple", 0.1, 1.0, 10.0, -1)
+                    }
+                  />
+                </div>
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="cashflow" className="text-[13px]">
-                Annual Cashflow
-              </Label>
-              <Input
-                id="cashflow"
-                name="cashflow"
-                value={formatCurrency(formData.cashflow)}
-                onChange={handleInputChange}
-                placeholder="Enter annual cashflow"
-                className={baseInputClasses}
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="downPaymentPercent" className="text-[13px]">
+                  Down Payment (%)
+                </Label>
+                <div className="relative group">
+                  <Input
+                    id="downPaymentPercent"
+                    name="downPaymentPercent"
+                    type="number"
+                    value={formData.downPaymentPercent}
+                    onChange={handleInputChange}
+                    min="0"
+                    max="100"
+                    step="1"
+                    className={`${baseInputClasses} pr-7`}
+                  />
+                  <StepperControls
+                    onIncrement={() =>
+                      handleStep("downPaymentPercent", 1, 0, 100, 1)
+                    }
+                    onDecrement={() =>
+                      handleStep("downPaymentPercent", 1, 0, 100, -1)
+                    }
+                  />
+                </div>
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="growthRate" className="text-[13px]">
-                Expected YoY Growth Rate (%)
-              </Label>
-              <div className="relative group">
-                <Input
-                  id="growthRate"
-                  name="growthRate"
-                  type="number"
-                  value={formData.growthRate}
-                  onChange={handleInputChange}
-                  placeholder="5.0"
-                  min="0"
-                  max="100"
-                  step="0.1"
-                  className={`${baseInputClasses} pr-7`}
-                />
-                <StepperControls
-                  onIncrement={() => handleStep("growthRate", 0.1, 0, 100, 1)}
-                  onDecrement={() => handleStep("growthRate", 0.1, 0, 100, -1)}
-                />
+              <div className="space-y-2">
+                <Label htmlFor="interestRate" className="text-[13px]">
+                  Interest Rate (%)
+                </Label>
+                <div className="relative group">
+                  <Input
+                    id="interestRate"
+                    name="interestRate"
+                    type="number"
+                    value={formData.interestRate}
+                    onChange={handleInputChange}
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    className={`${baseInputClasses} pr-7`}
+                  />
+                  <StepperControls
+                    onIncrement={() => handleStep("interestRate", 0.1, 0, 100, 1)}
+                    onDecrement={() =>
+                      handleStep("interestRate", 0.1, 0, 100, -1)
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-[13px]">Loan Term (Years)</Label>
+                <Select
+                  value={formData.loanTerm.toString()}
+                  onValueChange={handleLoanTermChange}
+                >
+                  <SelectTrigger className="bg-[#333] border-none rounded-[8px] text-[#BBB7AF] font-semibold text-[15px] focus:ring-0 focus:ring-offset-0">
+                    <SelectValue placeholder="Select loan term" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="3">3 Years</SelectItem>
+                    <SelectItem value="4">4 Years</SelectItem>
+                    <SelectItem value="5">5 Years</SelectItem>
+                    <SelectItem value="6">6 Years</SelectItem>
+                    <SelectItem value="7">7 Years</SelectItem>
+                    <SelectItem value="8">8 Years</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="cashflowMultiple" className="text-[13px]">
-                Cashflow Multiple
-              </Label>
-              <div className="relative group">
-                <Input
-                  id="cashflowMultiple"
-                  name="cashflowMultiple"
-                  type="number"
-                  value={formData.cashflowMultiple}
-                  onChange={handleInputChange}
-                  placeholder="2.3"
-                  min="1.0"
-                  max="10.0"
-                  step="0.1"
-                  className={`${baseInputClasses} pr-7`}
-                />
-                <StepperControls
-                  onIncrement={() =>
-                    handleStep("cashflowMultiple", 0.1, 1.0, 10.0, 1)
-                  }
-                  onDecrement={() =>
-                    handleStep("cashflowMultiple", 0.1, 1.0, 10.0, -1)
-                  }
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="downPaymentPercent" className="text-[13px]">
-                Down Payment (%)
-              </Label>
-              <div className="relative group">
-                <Input
-                  id="downPaymentPercent"
-                  name="downPaymentPercent"
-                  type="number"
-                  value={formData.downPaymentPercent}
-                  onChange={handleInputChange}
-                  placeholder="20"
-                  min="0"
-                  max="100"
-                  step="1"
-                  className={`${baseInputClasses} pr-7`}
-                />
-                <StepperControls
-                  onIncrement={() =>
-                    handleStep("downPaymentPercent", 1, 0, 100, 1)
-                  }
-                  onDecrement={() =>
-                    handleStep("downPaymentPercent", 1, 0, 100, -1)
-                  }
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="interestRate" className="text-[13px]">
-                Interest Rate (%)
-              </Label>
-              <div className="relative group">
-                <Input
-                  id="interestRate"
-                  name="interestRate"
-                  type="number"
-                  value={formData.interestRate}
-                  onChange={handleInputChange}
-                  placeholder="8.0"
-                  min="0"
-                  max="100"
-                  step="0.1"
-                  className={`${baseInputClasses} pr-7`}
-                />
-                <StepperControls
-                  onIncrement={() => handleStep("interestRate", 0.1, 0, 100, 1)}
-                  onDecrement={() =>
-                    handleStep("interestRate", 0.1, 0, 100, -1)
-                  }
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-[13px]">Loan Term (Years)</Label>
-              <Select
-                value={formData.loanTerm.toString()}
-                onValueChange={handleLoanTermChange}
-              >
-                <SelectTrigger className="bg-[#333] border-none rounded-[8px] text-[#BBB7AF] font-semibold text-[15px] focus:ring-0 focus:ring-offset-0">
-                  <SelectValue placeholder="Select loan term" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="3">3 Years</SelectItem>
-                  <SelectItem value="4">4 Years</SelectItem>
-                  <SelectItem value="5">5 Years</SelectItem>
-                  <SelectItem value="6">6 Years</SelectItem>
-                  <SelectItem value="7">7 Years</SelectItem>
-                  <SelectItem value="8">8 Years</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 };
 
