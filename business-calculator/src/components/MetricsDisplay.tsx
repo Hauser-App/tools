@@ -40,7 +40,7 @@ export const HeroStat = ({ label, value, description }: HeroStatProps) => (
 );
 
 interface MetricsDisplayProps {
-  cashOnCash?: number;
+  cashOnCash?: number | null;
   multipleOfCashflow?: number;
   roi?: number;
   status?: "GO" | "NO-GO";
@@ -52,6 +52,7 @@ interface MetricsDisplayProps {
   financedAmount?: number;
   monthlyPayment?: number;
   loanTermYears?: number;
+  totalCostOfAcquisition?: number;
 }
 
 const MetricsDisplay = ({
@@ -67,8 +68,10 @@ const MetricsDisplay = ({
   financedAmount = 0,
   monthlyPayment = 0,
   loanTermYears = 5,
+  totalCostOfAcquisition = 0,
 }: MetricsDisplayProps) => {
   const downPayment = valuation - financedAmount;
+  const showTotalCost = totalCostOfAcquisition > valuation;
   const isGo = status === "GO";
 
   const formatCurrency = (value: number) => {
@@ -112,6 +115,13 @@ const MetricsDisplay = ({
               value={`$${formatCurrency(monthlyPayment)}`}
               description="Total monthly payment"
             />
+            {showTotalCost && (
+              <MetricRow
+                label="Total Cost of Acquisition"
+                value={`$${formatCurrency(totalCostOfAcquisition)}`}
+                description="Valuation plus deferred compensation"
+              />
+            )}
           </div>
         </Card>
 
@@ -134,8 +144,12 @@ const MetricsDisplay = ({
           <div className="divide-y divide-[#333] [&>*:last-child]:pb-0">
             <MetricRow
               label="Cash on Cash"
-              value={`${cashOnCash.toFixed(2)}%`}
-              description="Annual cash return percentage"
+              value={cashOnCash !== null ? `${cashOnCash.toFixed(2)}%` : "N/A"}
+              description={
+                cashOnCash !== null
+                  ? "Annual cash return percentage"
+                  : "No cash invested to measure return on"
+              }
             />
             <MetricRow
               label="Multiple of Cashflow"
