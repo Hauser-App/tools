@@ -10,7 +10,9 @@ module.exports = {
   prefix: "",
   theme: {
     fontFamily: {
-      "sf-pro": ["SF Pro", "system-ui", "sans-serif"],
+      sans: ["Manrope", "Segoe UI", "sans-serif"],
+      display: ["'Big Shoulders Display'", "sans-serif"],
+      "display-sm": ["'Big Shoulders Text'", "sans-serif"],
     },
     container: {
       center: true,

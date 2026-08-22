@@ -1,34 +1,8 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Big+Shoulders+Display:wght@700&family=Big+Shoulders+Text:wght@700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@font-face {
-  font-family: "SF Pro";
-  src: url("https://cdn.jsdelivr.net/npm/@fontsource/sf-pro-display@4.5.0/files/sf-pro-display-400.woff2")
-    format("woff2");
-  font-weight: 400;
-}
-
-@font-face {
-  font-family: "SF Pro";
-  src: url("https://cdn.jsdelivr.net/npm/@fontsource/sf-pro-display@4.5.0/files/sf-pro-display-500.woff2")
-    format("woff2");
-  font-weight: 500;
-}
-
-@font-face {
-  font-family: "SF Pro";
-  src: url("https://cdn.jsdelivr.net/npm/@fontsource/sf-pro-display@4.5.0/files/sf-pro-display-600.woff2")
-    format("woff2");
-  font-weight: 600;
-}
-
-@font-face {
-  font-family: "SF Pro";
-  src: url("https://cdn.jsdelivr.net/npm/@fontsource/sf-pro-display@4.5.0/files/sf-pro-display-700.woff2")
-    format("woff2");
-  font-weight: 700;
-}
 
 @layer base {
   :root {
@@ -69,10 +43,64 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-sf-pro;
+    @apply bg-background text-foreground font-sans;
   }
 
   *:focus {
     @apply ring-1;
   }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
 }
+
+@media print {
+  body {
+    background-color: #fff !important;
+  }
+  body * {
+    visibility: hidden;
+  }
+  .print-report,
+  .print-report * {
+    visibility: visible;
+  }
+  .print-report {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+  .print-report,
+  .print-report * {
+    background-color: #fff !important;
+    color: #000 !important;
+    box-shadow: none !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, #333 25%, #3d3d3d 50%, #333 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
