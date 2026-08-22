@@ -2,6 +2,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import {
   Select,
@@ -25,6 +26,10 @@ interface BusinessFormData {
   downPaymentPercent: number;
   interestRate: number;
   loanTerm: number;
+  deferredCompEnabled: boolean;
+  deferredCompCategory: string;
+  deferredCompAmount: number;
+  deferredCompTerm: number;
 }
 
 interface BusinessInfo {
@@ -101,6 +106,10 @@ const BusinessInputForm = ({
     downPaymentPercent: 20,
     interestRate: 8.0,
     loanTerm: 5,
+    deferredCompEnabled: false,
+    deferredCompCategory: "Advisory Fee",
+    deferredCompAmount: 2000,
+    deferredCompTerm: 3,
   },
 }: BusinessInputFormProps) => {
   const [formData, setFormData] = React.useState<BusinessFormData>(initialData);
@@ -117,8 +126,8 @@ const BusinessInputForm = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
-    if (name === "revenue" || name === "cashflow") {
-      const numericValue = parseCurrencyInput(value);
+    if (name === "revenue" || name === "cashflow" || name === "deferredCompAmount") {
+      const numericValue = parseCurrencyInput(value) ?? 0;
       const updated = { ...formData, [name]: numericValue };
       setFormData(updated);
       onChange(updated);
@@ -135,6 +144,32 @@ const BusinessInputForm = ({
 
   const handleLoanTermChange = (value: string) => {
     const updated = { ...formData, loanTerm: parseInt(value) };
+    setFormData(updated);
+    onChange(updated);
+  };
+
+  const handleDeferredCompToggle = (checked: boolean) => {
+    const updated = { ...formData, deferredCompEnabled: checked };
+    setFormData(updated);
+    onChange(updated);
+  };
+
+  const handleDeferredCompCategoryChange = (value: string) => {
+    const updated = { ...formData, deferredCompCategory: value };
+    setFormData(updated);
+    onChange(updated);
+  };
+
+  const handleDeferredCompTermChange = (value: string) => {
+    const updated = { ...formData, deferredCompTerm: parseInt(value) };
+    setFormData(updated);
+    onChange(updated);
+  };
+
+  const handleDeferredCompAmountStep = (direction: 1 | -1) => {
+    const current = formData.deferredCompAmount ?? 0;
+    const next = Math.max(0, current + 100 * direction);
+    const updated = { ...formData, deferredCompAmount: next };
     setFormData(updated);
     onChange(updated);
   };
@@ -468,6 +503,93 @@ const BusinessInputForm = ({
                 </Select>
               </div>
             </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="w-full lg:max-w-[350px] bg-background rounded-[25px] overflow-hidden">
+        <Card className="bg-[#262626]">
+          <div className="pt-5 px-5 flex items-center justify-between">
+            <h2 className="text-xs font-semibold uppercase tracking-[0.3em] text-[#BBB7AF]">
+              Deferred Compensation
+            </h2>
+            <Switch
+              checked={formData.deferredCompEnabled}
+              onCheckedChange={handleDeferredCompToggle}
+              aria-label="Toggle deferred compensation"
+              className="data-[state=checked]:bg-[#BBB7AF]"
+            />
+          </div>
+          <CardContent className="pt-5">
+            {formData.deferredCompEnabled ? (
+              <div className="space-y-3.5">
+                <div className="space-y-2">
+                  <Label className="text-[13px]">Category</Label>
+                  <Select
+                    value={formData.deferredCompCategory}
+                    onValueChange={handleDeferredCompCategoryChange}
+                  >
+                    <SelectTrigger className="bg-[#333] border-none rounded-[8px] text-[#BBB7AF] font-semibold text-[15px] focus:ring-0 focus:ring-offset-0">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Advisory Fee">Advisory Fee</SelectItem>
+                      <SelectItem value="Consulting Agreement">
+                        Consulting Agreement
+                      </SelectItem>
+                      <SelectItem value="Profit Share">Profit Share</SelectItem>
+                      <SelectItem value="Seller Retention">
+                        Seller Retention
+                      </SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="deferredCompAmount" className="text-[13px]">
+                    Monthly Amount
+                  </Label>
+                  <div className="relative group">
+                    <Input
+                      id="deferredCompAmount"
+                      name="deferredCompAmount"
+                      value={formatCurrency(formData.deferredCompAmount)}
+                      onChange={handleInputChange}
+                      className={`${baseInputClasses} pr-7`}
+                    />
+                    <StepperControls
+                      onIncrement={() => handleDeferredCompAmountStep(1)}
+                      onDecrement={() => handleDeferredCompAmountStep(-1)}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-[13px]">Term (Years)</Label>
+                  <Select
+                    value={formData.deferredCompTerm.toString()}
+                    onValueChange={handleDeferredCompTermChange}
+                  >
+                    <SelectTrigger className="bg-[#333] border-none rounded-[8px] text-[#BBB7AF] font-semibold text-[15px] focus:ring-0 focus:ring-offset-0">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((year) => (
+                        <SelectItem key={year} value={year.toString()}>
+                          {year} {year === 1 ? "Year" : "Years"}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            ) : (
+              <p className="text-[13px] text-[#BBB7AF]">
+                Add a post-payoff advisory fee, consulting agreement, or
+                profit share to sweeten the deal beyond the core terms.
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>

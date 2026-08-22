@@ -38,8 +38,10 @@ const Home = () => {
     const monthlyRate = rate / 100 / 12;
     const numberOfPayments = years * 12;
     const monthlyPayment =
-      (principal * monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) /
-      (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
+      monthlyRate === 0
+        ? principal / numberOfPayments
+        : (principal * monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) /
+          (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
 
     let balance = principal;
     const schedule = [];
@@ -84,8 +86,10 @@ const Home = () => {
 
     const annualDebtService = monthlyPayment * 12;
     const cashOnCash =
-      ((data.cashflow - annualDebtService) / downPayment) * 100;
-    const dscr = data.cashflow / annualDebtService;
+      downPayment > 0
+        ? ((data.cashflow - annualDebtService) / downPayment) * 100
+        : null;
+    const dscr = annualDebtService > 0 ? data.cashflow / annualDebtService : null;
 
     // Calculate standard ROI
     const standardRoi = (data.cashflow / valuation) * 100;
@@ -99,9 +103,14 @@ const Home = () => {
     const debtAdjustedRoi =
       ((data.cashflow - averageAnnualInterest) / valuation) * 100;
 
+    const deferredCompTotal = data.deferredCompEnabled
+      ? data.deferredCompAmount * 12 * data.deferredCompTerm
+      : 0;
+    const totalCostOfAcquisition = valuation + deferredCompTotal;
+
     const analysisResult: AnalysisData = {
       businessName: data.businessName,
-      status: cashOnCash >= 40 ? "GO" : "NO-GO",
+      status: cashOnCash !== null && cashOnCash >= 40 ? "GO" : "NO-GO",
       metrics: {
         cashOnCash,
         multipleOfCashflow: data.cashflowMultiple,
@@ -111,9 +120,11 @@ const Home = () => {
         annualCashflow: data.cashflow,
         monthlyPrincipal,
         monthlyInterest,
+        averageAnnualInterest,
         valuation,
         financedAmount,
         monthlyPayment,
+        totalCostOfAcquisition,
       },
     };
 

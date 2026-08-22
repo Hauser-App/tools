@@ -7,23 +7,29 @@ export interface BusinessFormData {
   downPaymentPercent: number;
   interestRate: number;
   loanTerm: number;
+  deferredCompEnabled: boolean;
+  deferredCompCategory: string;
+  deferredCompAmount: number;
+  deferredCompTerm: number;
 }
 
 export interface AnalysisData {
   businessName: string;
   status: "GO" | "NO-GO";
   metrics: {
-    cashOnCash: number;
+    cashOnCash: number | null;
     multipleOfCashflow: number;
     roi: number;
     debtAdjustedRoi: number;
-    dscr: number;
+    dscr: number | null;
     annualCashflow: number;
     monthlyPrincipal: number;
     monthlyInterest: number;
+    averageAnnualInterest: number;
     valuation: number;
     financedAmount: number;
     monthlyPayment: number;
+    totalCostOfAcquisition: number;
   };
 }
 

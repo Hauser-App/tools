@@ -98,16 +98,21 @@ const TrendSparkline = ({
 
 function buildConsiderations(
   inputs: DealInputs,
-  metrics: { cashOnCash: number; roi: number; debtAdjustedRoi: number; dscr: number },
+  metrics: {
+    cashOnCash: number | null;
+    roi: number;
+    debtAdjustedRoi: number;
+    dscr: number | null;
+  },
 ): string[] {
   const notes: string[] = [];
 
-  if (Math.abs(metrics.cashOnCash - 40) <= 10) {
+  if (metrics.cashOnCash !== null && Math.abs(metrics.cashOnCash - 40) <= 10) {
     notes.push(
       "Cash-on-cash return is within 10 points of the 40% GO/NO-GO threshold — sensitive to small changes in terms.",
     );
   }
-  if (metrics.dscr < 1.25) {
+  if (metrics.dscr !== null && metrics.dscr < 1.25) {
     notes.push(
       `DSCR of ${metrics.dscr.toFixed(2)}x is below the 1.25x lenders typically require.`,
     );
@@ -151,17 +156,19 @@ interface AnalysisResultsProps {
   analysisDate?: string;
   status?: "GO" | "NO-GO";
   metrics?: {
-    cashOnCash: number;
+    cashOnCash: number | null;
     multipleOfCashflow: number;
     roi: number;
     debtAdjustedRoi: number;
-    dscr: number;
+    dscr: number | null;
     annualCashflow: number;
     monthlyPrincipal: number;
     monthlyInterest: number;
+    averageAnnualInterest: number;
     valuation: number;
     financedAmount: number;
     monthlyPayment: number;
+    totalCostOfAcquisition: number;
   };
   dealInputs?: DealInputs;
   amortizationSchedule?: {
@@ -188,9 +195,11 @@ const AnalysisResults = ({
     annualCashflow: 0,
     monthlyPrincipal: 0,
     monthlyInterest: 0,
+    averageAnnualInterest: 0,
     valuation: 0,
     financedAmount: 0,
     monthlyPayment: 0,
+    totalCostOfAcquisition: 0,
   },
   dealInputs = {
     downPaymentPercent: 20,
@@ -298,6 +307,7 @@ const AnalysisResults = ({
           valuation={metrics.valuation}
           financedAmount={metrics.financedAmount}
           monthlyPayment={metrics.monthlyPayment}
+          totalCostOfAcquisition={metrics.totalCostOfAcquisition}
         />
 
         <div className="grid gap-[10px] lg:gap-[20px] lg:grid-cols-2 items-start">
@@ -308,8 +318,12 @@ const AnalysisResults = ({
             <div className="flex items-start justify-between gap-4 mb-4">
               <HeroStat
                 label="DSCR"
-                value={`${metrics.dscr.toFixed(2)}x`}
-                description="Lenders typically require 1.25x+"
+                value={metrics.dscr !== null ? `${metrics.dscr.toFixed(2)}x` : "N/A"}
+                description={
+                  metrics.dscr !== null
+                    ? "Lenders typically require 1.25x+"
+                    : "No debt service to cover"
+                }
               />
               <div className="text-right">
                 <p className="text-sm text-[#BBB7AF] mb-1">Payback Period</p>
@@ -329,8 +343,8 @@ const AnalysisResults = ({
               />
               <MetricRow
                 label="Annual Interest Cost"
-                value={`$${Math.round(metrics.monthlyInterest * 12).toLocaleString()}`}
-                description="Interest paid on the loan per year"
+                value={`$${Math.round(metrics.averageAnnualInterest).toLocaleString()}`}
+                description="Average interest paid per year over the loan"
               />
               <MetricRow
                 label="Monthly Net Profit"
