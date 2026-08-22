@@ -184,7 +184,7 @@ const Home = () => {
             <img
               src="/images/hauser-logo.svg"
               alt="Hauser"
-              className="hidden lg:block h-9 w-auto mt-[10px] lg:ml-[20px] lg:-mb-[10px]"
+              className="hidden lg:block h-9 w-auto mt-[8px] lg:ml-[20px] lg:-mb-[8px]"
             />
             <BusinessInputForm
               key={formKey}
