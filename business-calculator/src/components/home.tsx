@@ -1,51 +1,34 @@
 import React, { useState } from "react";
 import BusinessInputForm from "./BusinessInputForm";
 import AnalysisResults from "./AnalysisResults";
-import ChatInterface from "./ChatInterface";
-
-interface BusinessFormData {
-  businessName: string;
-  revenue: number;
-  cashflow: number;
-  growthRate: number;
-  cashflowMultiple: number;
-  downPaymentPercent: number;
-  interestRate: number;
-  loanTerm: number;
-}
-
-interface AnalysisData {
-  businessName: string;
-  status: "GO" | "NO-GO";
-  metrics: {
-    cashOnCash: number;
-    multipleOfCashflow: number;
-    roi: number;
-    debtAdjustedRoi: number;
-    annualCashflow: number;
-    monthlyPrincipal: number;
-    monthlyInterest: number;
-    valuation: number;
-    financedAmount: number;
-    monthlyPayment: number;
-  };
-  cashFlowProjections: { label: string; data: number }[];
-  roiProjections: { label: string; data: number }[];
-}
+import ResultsSkeleton from "./ResultsSkeleton";
+import SavedAnalysesList from "./SavedAnalysesList";
+import { Button } from "./ui/button";
+import { Printer, Save } from "lucide-react";
+import { Toaster } from "./ui/toaster";
+import { useToast } from "./ui/use-toast";
+import {
+  listSavedAnalyses,
+  saveAnalysis,
+  deleteSavedAnalysis,
+  type BusinessFormData,
+  type AnalysisData,
+  type AmortizationEntry,
+  type SavedAnalysis,
+} from "@/lib/savedAnalyses";
 
 const Home = () => {
+  const { toast } = useToast();
   const [showResults, setShowResults] = useState(false);
   const [formData, setFormData] = useState<BusinessFormData | null>(null);
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
   const [amortizationSchedule, setAmortizationSchedule] = useState<
-    {
-      month: number;
-      payment: number;
-      principal: number;
-      interest: number;
-      balance: number;
-    }[]
+    AmortizationEntry[]
   >([]);
+  const [savedAnalyses, setSavedAnalyses] = useState<SavedAnalysis[]>(() =>
+    listSavedAnalyses(),
+  );
+  const [formKey, setFormKey] = useState(0);
 
   const calculateAmortization = (
     principal: number,
@@ -81,6 +64,11 @@ const Home = () => {
   const handleAnalysis = (data: BusinessFormData) => {
     setFormData(data);
 
+    if (!data.cashflow || data.cashflow <= 0) {
+      setShowResults(false);
+      return;
+    }
+
     const valuation = data.cashflow * data.cashflowMultiple;
     const downPayment = (valuation * data.downPaymentPercent) / 100;
     const financedAmount = valuation - downPayment;
@@ -97,6 +85,7 @@ const Home = () => {
     const annualDebtService = monthlyPayment * 12;
     const cashOnCash =
       ((data.cashflow - annualDebtService) / downPayment) * 100;
+    const dscr = data.cashflow / annualDebtService;
 
     // Calculate standard ROI
     const standardRoi = (data.cashflow / valuation) * 100;
@@ -118,6 +107,7 @@ const Home = () => {
         multipleOfCashflow: data.cashflowMultiple,
         roi: standardRoi,
         debtAdjustedRoi,
+        dscr,
         annualCashflow: data.cashflow,
         monthlyPrincipal,
         monthlyInterest,
@@ -125,14 +115,6 @@ const Home = () => {
         financedAmount,
         monthlyPayment,
       },
-      cashFlowProjections: Array.from({ length: 12 }, (_, i) => ({
-        label: new Date(2024, i).toLocaleString("default", { month: "short" }),
-        data: (data.cashflow / 12) * (1 + (data.growthRate / 100 / 12) * i),
-      })),
-      roiProjections: Array.from({ length: 5 }, (_, i) => ({
-        label: `Year ${i + 1}`,
-        data: debtAdjustedRoi * (1 + (data.growthRate / 100) * i),
-      })),
     };
 
     setAnalysisData(analysisResult);
@@ -140,47 +122,106 @@ const Home = () => {
     setShowResults(true);
   };
 
-  return (
-    <div className="min-h-screen bg-[#BBB7AF] text-white p-8">
-      <div className="max-w-[1680px] mx-auto space-y-6">
-        <div className="text-center">
-          <h1 className="text-4xl text-[#262626] mb-4 font-medium tracking-tight font-sans">
-            Small Business Acquisition Calculator
-          </h1>
-          <p className="text-[#262626] max-w-2xl mx-auto text-base tracking-normal text-center">
-            Transaction analysis with comprehensive metrics and visual insights
-          </p>
-        </div>
+  const handleSave = () => {
+    if (!formData || !analysisData) return;
+    saveAnalysis({ formData, analysisData, amortizationSchedule });
+    setSavedAnalyses(listSavedAnalyses());
+    toast({ title: "Analysis saved" });
+  };
 
-        <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-6">
-          <div className="lg:sticky lg:top-8 lg:h-fit space-y-6">
-            <BusinessInputForm onSubmit={handleAnalysis} />
-            <ChatInterface />
+  const handleExport = () => {
+    window.print();
+  };
+
+  const handleLoad = (saved: SavedAnalysis) => {
+    setFormData(saved.formData);
+    setAnalysisData(saved.analysisData);
+    setAmortizationSchedule(saved.amortizationSchedule);
+    setShowResults(true);
+    setFormKey((key) => key + 1);
+  };
+
+  const handleDelete = (id: string) => {
+    deleteSavedAnalysis(id);
+    setSavedAnalyses(listSavedAnalyses());
+  };
+
+  return (
+    <div className="min-h-screen bg-[#BBB7AF] text-white p-[10px] pb-[86px] lg:p-8">
+      <div className="lg:hidden fixed bottom-[calc(10px+env(safe-area-inset-bottom))] left-[10px] right-[10px] z-50 flex items-center justify-between gap-[10px] rounded-[20px] bg-[#262626]/70 backdrop-blur-md p-[10px] no-print">
+        <img
+          src="/images/hauser-logo.svg"
+          alt="Hauser"
+          className="h-[20px] w-auto ml-[10px]"
+        />
+        {showResults && (
+          <div className="flex items-center gap-[10px]">
+            <Button
+              className="text-[#262626] bg-[#ddd8cf]/70 backdrop-blur-sm hover:bg-[#ddd8cf]/85 h-9 px-2.5"
+              onClick={handleExport}
+              aria-label="Export report"
+            >
+              <Printer className="h-4 w-4" />
+              <span className="h-4 w-px bg-[#262626]/30 mx-[10px]" />
+              <span className="text-[13px] font-bold">PDF</span>
+            </Button>
+            <Button
+              size="icon"
+              className="text-[#262626] bg-[#ddd8cf]/70 backdrop-blur-sm hover:bg-[#ddd8cf]/85"
+              onClick={handleSave}
+              aria-label="Save analysis"
+            >
+              <Save className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+      </div>
+      <div className="max-w-[1680px] mx-auto space-y-[10px] lg:space-y-[20px]">
+        <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-[10px] lg:gap-[30px]">
+          <div
+            className={`lg:sticky lg:top-8 ${showResults ? "lg:mt-[24px]" : ""} lg:h-fit space-y-[10px] lg:space-y-[20px] no-print`}
+          >
+            <img
+              src="/images/hauser-logo.svg"
+              alt="Hauser"
+              className="hidden lg:block h-9 w-auto mt-[10px] lg:ml-[20px] lg:-mb-[10px]"
+            />
+            <BusinessInputForm
+              key={formKey}
+              onChange={handleAnalysis}
+              initialData={formData ?? undefined}
+            />
+            <SavedAnalysesList
+              analyses={savedAnalyses}
+              onLoad={handleLoad}
+              onDelete={handleDelete}
+            />
           </div>
 
-          <div
-            className={`transition-opacity duration-300 ${showResults ? "opacity-100" : "opacity-0"}`}
-          >
-            {showResults && formData && analysisData && (
+          <div>
+            {showResults && formData && analysisData ? (
               <AnalysisResults
                 businessName={analysisData.businessName}
                 status={analysisData.status}
                 metrics={analysisData.metrics}
+                dealInputs={{
+                  downPaymentPercent: formData.downPaymentPercent,
+                  interestRate: formData.interestRate,
+                  loanTerm: formData.loanTerm,
+                  growthRate: formData.growthRate,
+                  cashflowMultiple: formData.cashflowMultiple,
+                }}
                 amortizationSchedule={amortizationSchedule}
-                cashFlowProjections={analysisData.cashFlowProjections}
-                roiProjections={analysisData.roiProjections}
-                recommendations={[
-                  `Cash on Cash Return: ${analysisData.metrics.cashOnCash.toFixed(2)}% indicates ${analysisData.metrics.cashOnCash >= 40 ? "strong" : "weak"} returns`,
-                  `Multiple of Cashflow: ${formData.cashflowMultiple}x (standard valuation metric)`,
-                  `Standard ROI: ${analysisData.metrics.roi.toFixed(2)}% vs Debt-Adjusted ROI: ${analysisData.metrics.debtAdjustedRoi.toFixed(2)}%`,
-                  `Debt-adjusted ROI accounts for $${(analysisData.metrics.monthlyInterest * 12).toLocaleString()} in annual interest payments`,
-                  `${analysisData.metrics.debtAdjustedRoi < analysisData.metrics.roi ? "Financing costs significantly impact returns" : "Favorable financing terms maintain strong returns"}`,
-                ]}
+                onSave={handleSave}
+                onExport={handleExport}
               />
+            ) : (
+              <ResultsSkeleton />
             )}
           </div>
         </div>
       </div>
+      <Toaster />
     </div>
   );
 };

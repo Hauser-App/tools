@@ -1,48 +1,43 @@
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  ArrowUpCircle,
-  ArrowDownCircle,
-  DollarSign,
-  Percent,
-  Calculator,
-} from "lucide-react";
+import { Card } from "@/components/ui/card";
 
-interface MetricCardProps {
-  title: string;
+interface MetricRowProps {
+  label: string;
   value: string | number;
-  icon: React.ReactNode;
   description?: string;
 }
 
-const MetricCard = ({
-  title = "Metric",
-  value = "0",
-  icon = <DollarSign className="h-4 w-4" />,
-  description = "No description available",
-}: MetricCardProps) => {
-  return (
-    <Card
-      className={
-        `${title === "Status" ? (value === "GO" ? "bg-[#c0ff02] text-[#262626]" : "bg-[#B05670] text-white") : "bg-[#262626] text-white"}` +
-        " border-none"
-      }
-    >
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        {icon}
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold mb-[10px]">{value}</div>
-        <p
-          className={`text-xs ${title === "Status" ? (value === "GO" ? "text-[#262626]/70" : "text-white/70") : "text-[#BBB7AF]"}`}
-        >
-          {description}
-        </p>
-      </CardContent>
-    </Card>
-  );
-};
+export const MetricRow = ({ label, value, description }: MetricRowProps) => (
+  <div className="flex items-center justify-between gap-4 py-3">
+    <div>
+      <p className="text-sm text-[#BBB7AF]">{label}</p>
+      {description && (
+        <p className="text-xs text-[#8B8680] mt-0.5">{description}</p>
+      )}
+    </div>
+    <div className="font-display font-bold text-[26px] text-[#f3f3f3] whitespace-nowrap">
+      {value}
+    </div>
+  </div>
+);
+
+interface HeroStatProps {
+  label: string;
+  value: string | number;
+  description?: string;
+}
+
+export const HeroStat = ({ label, value, description }: HeroStatProps) => (
+  <div className="mb-4">
+    <p className="text-sm text-[#BBB7AF] mb-1">{label}</p>
+    <p className="font-display font-bold text-[40px] leading-none text-[#fff]">
+      {value}
+    </p>
+    {description && (
+      <p className="text-xs text-[#8B8680] mt-1.5">{description}</p>
+    )}
+  </div>
+);
 
 interface MetricsDisplayProps {
   cashOnCash?: number;
@@ -74,101 +69,86 @@ const MetricsDisplay = ({
   loanTermYears = 5,
 }: MetricsDisplayProps) => {
   const downPayment = valuation - financedAmount;
+  const isGo = status === "GO";
 
   const formatCurrency = (value: number) => {
     return value.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     });
   };
 
   return (
-    <div className={`w-full h-full bg-[#BBB7AF] p-6 ${className}`}>
-      <div className="space-y-6">
-        {/* Key Metrics Section */}
-        <div>
-          <h2 className="text-[20px] font-bold mb-4">Key Metrics</h2>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <MetricCard
-              title="Cash on Cash"
-              value={`${cashOnCash.toFixed(2)}%`}
-              icon={<DollarSign className="h-4 w-4 text-[#c0ff02]" />}
-              description="Annual cash return percentage"
-            />
-
-            <MetricCard
-              title="Multiple of Cashflow"
-              value={multipleOfCashflow.toFixed(2)}
-              icon={<ArrowUpCircle className="h-4 w-4 text-[#c0ff02]" />}
-              description="Business value to cashflow ratio"
-            />
-
-            <MetricCard
-              title="ROI"
-              value={`${roi.toFixed(2)}%`}
-              icon={<Percent className="h-4 w-4 text-[#c0ff02]" />}
-              description="Return on investment percentage"
-            />
-
-            <MetricCard
-              title="Status"
-              value={status}
-              icon={
-                status === "GO" ? (
-                  <ArrowUpCircle className="h-4 w-4 text-[#262626]" />
-                ) : (
-                  <ArrowDownCircle className="h-4 w-4 text-white" />
-                )
-              }
-              description={
-                status === "GO"
-                  ? "Investment recommended"
-                  : "Investment not recommended"
-              }
-            />
-          </div>
-        </div>
-
+    <div className={`w-full h-full bg-[#BBB7AF] ${className}`}>
+      <div className="grid gap-[10px] lg:gap-[20px] lg:grid-cols-2">
         {/* Financing Details Section */}
-        <div>
-          <h2 className="text-[20px] font-bold mb-4">Financing Details</h2>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
-            <MetricCard
-              title="Valuation"
-              value={`$${formatCurrency(valuation)}`}
-              icon={<Calculator className="h-4 w-4 text-[#c0ff02]" />}
-              description="Total business valuation"
-            />
-
-            <MetricCard
-              title="Annual Cashflow"
+        <Card className="p-5 bg-[#262626] flex flex-col">
+          <h2 className="text-xs font-semibold uppercase tracking-[0.3em] text-[#BBB7AF] mb-4">
+            Financing Details
+          </h2>
+          <HeroStat
+            label="Valuation"
+            value={`$${formatCurrency(valuation)}`}
+            description="Total business valuation"
+          />
+          <div className="divide-y divide-[#333] border-t border-[#333] [&>*:last-child]:pb-0">
+            <MetricRow
+              label="Annual Cashflow"
               value={`$${formatCurrency(annualCashflow)}`}
-              icon={<DollarSign className="h-4 w-4 text-[#c0ff02]" />}
               description="Annual cash flow amount"
             />
-
-            <MetricCard
-              title="Down Payment"
+            <MetricRow
+              label="Down Payment"
               value={`$${formatCurrency(downPayment)}`}
-              icon={<DollarSign className="h-4 w-4 text-[#c0ff02]" />}
               description="Initial investment required"
             />
-
-            <MetricCard
-              title="Amount Financed"
+            <MetricRow
+              label="Amount Financed"
               value={`$${formatCurrency(financedAmount)}`}
-              icon={<DollarSign className="h-4 w-4 text-[#c0ff02]" />}
               description="Total loan amount"
             />
-
-            <MetricCard
-              title="Monthly Payment"
+            <MetricRow
+              label="Monthly Payment"
               value={`$${formatCurrency(monthlyPayment)}`}
-              icon={<DollarSign className="h-4 w-4 text-[#c0ff02]" />}
               description="Total monthly payment"
             />
           </div>
-        </div>
+        </Card>
+
+        {/* Key Metrics Section */}
+        <Card className="p-5 bg-[#262626] flex flex-col">
+          <h2 className="text-xs font-semibold uppercase tracking-[0.3em] text-[#BBB7AF] mb-4">
+            Key Metrics
+          </h2>
+          <div className="flex-1 flex items-center mb-4 min-h-[44px]">
+            <div
+              className={`w-full h-[calc(100%-30px)] flex items-center justify-end px-6 rounded-[15px] ${
+                isGo ? "bg-[#c0ff02]" : "bg-[#E47192]"
+              }`}
+            >
+              <span className="font-sans font-bold uppercase text-[96px] tracking-tight text-[#262626]">
+                {status}
+              </span>
+            </div>
+          </div>
+          <div className="divide-y divide-[#333] [&>*:last-child]:pb-0">
+            <MetricRow
+              label="Cash on Cash"
+              value={`${cashOnCash.toFixed(2)}%`}
+              description="Annual cash return percentage"
+            />
+            <MetricRow
+              label="Multiple of Cashflow"
+              value={multipleOfCashflow.toFixed(2)}
+              description="Business value to cashflow ratio"
+            />
+            <MetricRow
+              label="ROI"
+              value={`${roi.toFixed(2)}%`}
+              description="Return on investment percentage"
+            />
+          </div>
+        </Card>
       </div>
     </div>
   );
