@@ -19,14 +19,22 @@ export default defineConfig({
     outDir: "dist",
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ["react", "react-dom", "react-router-dom"],
-          ui: [
-            "@radix-ui/react-label",
-            "@radix-ui/react-select",
-            "@radix-ui/react-slot",
-          ],
-          charts: ["chart.js", "react-chartjs-2"],
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return;
+          if (
+            id.includes("/react/") ||
+            id.includes("/react-dom/") ||
+            id.includes("/react-router-dom/")
+          ) {
+            return "vendor";
+          }
+          if (
+            id.includes("@radix-ui/react-label") ||
+            id.includes("@radix-ui/react-select") ||
+            id.includes("@radix-ui/react-slot")
+          ) {
+            return "ui";
+          }
         },
       },
     },
@@ -44,7 +52,7 @@ export default defineConfig({
   resolve: {
     preserveSymlinks: true,
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(import.meta.dirname, "./src"),
     },
   },
 });
