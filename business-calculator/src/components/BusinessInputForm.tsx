@@ -216,7 +216,7 @@ const BusinessInputForm = ({
             </h2>
           </div>
           <CardContent className="pt-5">
-            <div className="space-y-3.5">
+            <div className="space-y-[9px]">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="businessName" className="text-[13px]">
@@ -244,7 +244,7 @@ const BusinessInputForm = ({
               </div>
 
               {isInfoExpanded && (
-                <div className="space-y-3.5 pt-1">
+                <div className="space-y-[9px] pt-1">
                   <div className="space-y-2">
                     <Label htmlFor="ownerName" className="text-[13px]">
                       Owner Name
@@ -354,7 +354,7 @@ const BusinessInputForm = ({
             </h2>
           </div>
           <CardContent className="pt-5">
-            <div className="space-y-3.5">
+            <div className="space-y-[9px]">
               <div className="space-y-2">
                 <Label htmlFor="revenue" className="text-[13px]">
                   Annual Revenue
@@ -522,7 +522,7 @@ const BusinessInputForm = ({
           </div>
           <CardContent className="pt-5">
             {formData.deferredCompEnabled ? (
-              <div className="space-y-3.5">
+              <div className="space-y-[9px]">
                 <div className="space-y-2">
                   <Label className="text-[13px]">Category</Label>
                   <Select
